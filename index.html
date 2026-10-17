@@ -17,23 +17,14 @@
     font-size: 16px;
     text-shadow: 0 0 5px #00ff00;
   }
-  #terminal {
-    white-space: pre-wrap;
-    word-break: break-all;
-    line-height: 1.5;
-  }
+  #terminal { white-space: pre-wrap; word-break: break-all; line-height: 1.5; }
   .cursor {
-    display: inline-block;
-    width: 10px;
-    height: 18px;
-    background: #00ff00;
-    animation: blink 1s infinite;
-    vertical-align: middle;
+    display: inline-block; width: 10px; height: 18px;
+    background: #00ff00; animation: blink 1s infinite; vertical-align: middle;
   }
   @keyframes blink { 0%,50% {opacity:1;} 51%,100% {opacity:0;} }
   .done {
-    color: #ff0000;
-    font-weight: bold;
+    color: #ff0000; font-weight: bold;
     text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
   }
 </style>
@@ -64,18 +55,23 @@
     }, speed);
   }
 
-  // ===== FASE 1: LOADING HANG 5 DETIK =====
+  // ===== FASE 1: LOADING HANG BENERAN 5 DETIK =====
   write('SYSTEM LOADING...\n');
   write('Please wait...\n\n');
 
+  // PAKSA main thread kekunci pake operasi berat yang gak bisa di-optimize
   var end = Date.now() + 5000;
-  var counter = 0;
+  var junk = [];
+  var heavy = 'x';
   while (Date.now() < end) {
-    for (var j = 0; j < 100000; j++) {
-      Math.sqrt(Math.random() * 99999);
-    }
-    counter++;
+    // alokasi array gede + operasi string berulang = gak bisa di-JIT
+    junk.push(new Array(1000).fill(Math.random()));
+    if (junk.length > 1000) junk = []; // reset biar gak OOM tapi tetap berat
+    heavy = (heavy + 'x').substring(0, 50000); // string growing + slice
+    // paksa cek waktu terus
   }
+  junk = null;
+  heavy = null;
 
   // ===== FASE 2: EFEK TERMINAL HIJAU =====
   term.innerHTML = '';
@@ -105,7 +101,6 @@
         setTimeout(nextLine, 150);
       });
     } else {
-      // ===== FASE 3: PRINT PESAN AKHIR =====
       setTimeout(function(){
         out += '\n<span class="done">DONE, YOUR PHONE IS NOW UNDER THE CONTROL OF A SHADOW ORGANIZATION</span>\n';
         term.innerHTML = out + '<span class="cursor"></span>';
