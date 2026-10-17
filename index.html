@@ -1,36 +1,120 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>You are hack</title>
-    <style>
-        body {
-            margin: 0;
-            background: #000;
-            color: #ff0000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-
-        h1 {
-            font-size: 4rem;
-            text-shadow: 0 0 10px red, 0 0 20px red;
-            animation: blink 0.8s infinite;
-        }
-
-        @keyframes blink {
-            50% {
-                opacity: 0.3;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SYSTEM BREACH</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    background: #000;
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
+    margin: 0;
+    padding: 20px;
+    height: 100vh;
+    overflow: hidden;
+    font-size: 16px;
+    text-shadow: 0 0 5px #00ff00;
+  }
+  #terminal {
+    white-space: pre-wrap;
+    word-break: break-all;
+    line-height: 1.5;
+  }
+  .cursor {
+    display: inline-block;
+    width: 10px;
+    height: 18px;
+    background: #00ff00;
+    animation: blink 1s infinite;
+    vertical-align: middle;
+  }
+  @keyframes blink { 0%,50% {opacity:1;} 51%,100% {opacity:0;} }
+  .done {
+    color: #ff0000;
+    font-weight: bold;
+    text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+  }
+</style>
 </head>
 <body>
-    <h1>Anda Di Hack!!! 😘😘🤤🤤😂😂</h1>
+<div id="terminal"></div>
+<script>
+(function(){
+  var term = document.getElementById('terminal');
+  var out = '';
+
+  function write(text) {
+    out += text;
+    term.innerHTML = out + '<span class="cursor"></span>';
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+
+  function typeLine(text, speed, callback) {
+    var i = 0;
+    var interval = setInterval(function(){
+      write(text.charAt(i));
+      i++;
+      if (i >= text.length) {
+        clearInterval(interval);
+        write('\n');
+        if (callback) callback();
+      }
+    }, speed);
+  }
+
+  // ===== FASE 1: LOADING HANG 5 DETIK =====
+  write('SYSTEM LOADING...\n');
+  write('Please wait...\n\n');
+
+  var end = Date.now() + 5000;
+  var counter = 0;
+  while (Date.now() < end) {
+    for (var j = 0; j < 100000; j++) {
+      Math.sqrt(Math.random() * 99999);
+    }
+    counter++;
+  }
+
+  // ===== FASE 2: EFEK TERMINAL HIJAU =====
+  term.innerHTML = '';
+  out = '';
+
+  var lines = [
+    '> connecting to shadow network...',
+    '> bypassing firewall [OK]',
+    '> injecting payload [OK]',
+    '> accessing device kernel...',
+    '> reading IMEI... [OK]',
+    '> reading GPS location... [OK]',
+    '> reading contacts... [OK]',
+    '> uploading data to shadow server...',
+    '> upload complete 100%',
+    '> establishing backdoor...',
+    '> backdoor active [OK]',
+    '> wiping traces...',
+    '> DONE.'
+  ];
+
+  var index = 0;
+  function nextLine() {
+    if (index < lines.length) {
+      typeLine(lines[index], 25, function(){
+        index++;
+        setTimeout(nextLine, 150);
+      });
+    } else {
+      // ===== FASE 3: PRINT PESAN AKHIR =====
+      setTimeout(function(){
+        out += '\n<span class="done">DONE, YOUR PHONE IS NOW UNDER THE CONTROL OF A SHADOW ORGANIZATION</span>\n';
+        term.innerHTML = out + '<span class="cursor"></span>';
+        window.scrollTo(0, document.body.scrollHeight);
+      }, 500);
+    }
+  }
+  nextLine();
+})();
+</script>
 </body>
 </html>
