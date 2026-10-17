@@ -2,113 +2,127 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>SYSTEM BREACH</title>
 <style>
-  * { box-sizing: border-box; }
-  body {
-    background: #000;
-    color: #00ff00;
-    font-family: 'Courier New', monospace;
-    margin: 0;
-    padding: 20px;
-    height: 100vh;
-    overflow: hidden;
-    font-size: 16px;
-    text-shadow: 0 0 5px #00ff00;
+  * { box-sizing: border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    background:#000; color:#00ff00; font-family:'Courier New',monospace;
+    height:100vh; width:100vw; overflow:hidden; font-size:16px;
+    text-shadow:0 0 5px #00ff00; user-select:none;
   }
-  #terminal { white-space: pre-wrap; word-break: break-all; line-height: 1.5; }
+  #terminal { white-space:pre-wrap; word-break:break-all; line-height:1.5; padding:20px; }
+  #overlay {
+    position:fixed; inset:0; background:#000; z-index:9999;
+    display:flex; align-items:center; justify-content:center;
+    color:#00ff00; font-size:20px; text-align:center;
+  }
   .cursor {
-    display: inline-block; width: 10px; height: 18px;
-    background: #00ff00; animation: blink 1s infinite; vertical-align: middle;
+    display:inline-block; width:10px; height:18px; background:#00ff00;
+    animation:blink 1s infinite; vertical-align:middle;
   }
-  @keyframes blink { 0%,50% {opacity:1;} 51%,100% {opacity:0;} }
-  .done {
-    color: #ff0000; font-weight: bold;
-    text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
-  }
+  @keyframes blink { 0%,50%{opacity:1;} 51%,100%{opacity:0;} }
+  .done { color:#ff0000; font-weight:bold; text-shadow:0 0 10px #ff0000,0 0 20px #ff0000; }
 </style>
 </head>
 <body>
+
+<div id="overlay">SYSTEM EXIT...<br><span style="font-size:12px;">do not turn off your device</span></div>
 <div id="terminal"></div>
+
 <script>
 (function(){
   var term = document.getElementById('terminal');
+  var overlay = document.getElementById('overlay');
   var out = '';
 
-  function write(text) {
+  function write(text){
     out += text;
     term.innerHTML = out + '<span class="cursor"></span>';
     window.scrollTo(0, document.body.scrollHeight);
   }
 
-  function typeLine(text, speed, callback) {
+  function typeLine(text, speed, cb){
     var i = 0;
-    var interval = setInterval(function(){
-      write(text.charAt(i));
-      i++;
-      if (i >= text.length) {
-        clearInterval(interval);
-        write('\n');
-        if (callback) callback();
-      }
+    var iv = setInterval(function(){
+      write(text.charAt(i)); i++;
+      if(i >= text.length){ clearInterval(iv); write('\n'); if(cb) cb(); }
     }, speed);
   }
 
-  // ===== FASE 1: LOADING HANG BENERAN 5 DETIK =====
-  write('SYSTEM LOADING...\n');
-  write('Please wait...\n\n');
+  // ===== FASE 0: LOCK TAP/SENTUHAN =====
+  function blockTouch(e){ e.preventDefault(); return false; }
+  document.addEventListener('touchmove', blockTouch, {passive:false});
+  document.addEventListener('gesturestart', blockTouch, {passive:false});
+  document.addEventListener('contextmenu', blockTouch, {passive:false});
 
-  // PAKSA main thread kekunci pake operasi berat yang gak bisa di-optimize
-  var end = Date.now() + 5000;
-  var junk = [];
-  var heavy = 'x';
-  while (Date.now() < end) {
-    // alokasi array gede + operasi string berulang = gak bisa di-JIT
-    junk.push(new Array(1000).fill(Math.random()));
-    if (junk.length > 1000) junk = []; // reset biar gak OOM tapi tetap berat
-    heavy = (heavy + 'x').substring(0, 50000); // string growing + slice
-    // paksa cek waktu terus
-  }
-  junk = null;
-  heavy = null;
+  // ===== FASE 1: FAKE EXIT (layar hitam 2 detik) =====
+  setTimeout(function(){
+    overlay.style.display = 'flex';
+    overlay.innerHTML = 'SYSTEM EXIT...<br><span style="font-size:12px;">do not turn off your device</span>';
 
-  // ===== FASE 2: EFEK TERMINAL HIJAU =====
-  term.innerHTML = '';
-  out = '';
+    // paksa fullscreen biar keliatan kayak app
+    var el = document.documentElement;
+    var rfs = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+    if(rfs) { try { rfs.call(el); } catch(e){} }
 
-  var lines = [
-    '> connecting to shadow network...',
-    '> bypassing firewall [OK]',
-    '> injecting payload [OK]',
-    '> accessing device kernel...',
-    '> reading IMEI... [OK]',
-    '> reading GPS location... [OK]',
-    '> reading contacts... [OK]',
-    '> uploading data to shadow server...',
-    '> upload complete 100%',
-    '> establishing backdoor...',
-    '> backdoor active [OK]',
-    '> wiping traces...',
-    '> DONE.'
-  ];
+    // coba vibrate (kalau didukung)
+    if(navigator.vibrate) navigator.vibrate([200,100,200,100,500]);
 
-  var index = 0;
-  function nextLine() {
-    if (index < lines.length) {
-      typeLine(lines[index], 25, function(){
-        index++;
-        setTimeout(nextLine, 150);
-      });
-    } else {
+    // ===== FASE 2: "HANG" 5 DETIK BENERAN =====
+    setTimeout(function(){
+      var end = Date.now() + 5000;
+      var junk = [];
+      var heavy = 'x';
+      while(Date.now() < end){
+        junk.push(new Array(1000).fill(Math.random()));
+        if(junk.length > 1000) junk = [];
+        heavy = (heavy + 'x').substring(0, 50000);
+      }
+      junk = null; heavy = null;
+
+      // ===== FASE 3: OVERLAY "REBOOT" SEOLAH WEB CLOSED & REOPEN =====
+      overlay.innerHTML = 'REINITIALIZING...<br><span style="font-size:12px;">shadow protocol v3</span>';
+      if(navigator.vibrate) navigator.vibrate([500,200,500]);
+
       setTimeout(function(){
-        out += '\n<span class="done">DONE, YOUR PHONE IS NOW UNDER THE CONTROL OF A SHADOW ORGANIZATION</span>\n';
-        term.innerHTML = out + '<span class="cursor"></span>';
-        window.scrollTo(0, document.body.scrollHeight);
-      }, 500);
-    }
-  }
-  nextLine();
+        overlay.style.display = 'none';
+        term.innerHTML = ''; out = '';
+
+        var lines = [
+          '> connecting to shadow network...',
+          '> bypassing firewall [OK]',
+          '> injecting payload [OK]',
+          '> accessing device kernel...',
+          '> reading IMEI... [OK]',
+          '> reading GPS location... [OK]',
+          '> reading contacts... [OK]',
+          '> uploading data to shadow server...',
+          '> upload complete 100%',
+          '> establishing backdoor...',
+          '> backdoor active [OK]',
+          '> wiping traces...',
+          '> DONE.'
+        ];
+
+        var idx = 0;
+        function nextLine(){
+          if(idx < lines.length){
+            typeLine(lines[idx], 25, function(){ idx++; setTimeout(nextLine, 150); });
+          } else {
+            setTimeout(function(){
+              out += '\n<span class="done">DONE, YOUR PHONE IS NOW UNDER THE CONTROL OF A SHADOW ORGANIZATION</span>\n';
+              term.innerHTML = out + '<span class="cursor"></span>';
+              window.scrollTo(0, document.body.scrollHeight);
+              if(navigator.vibrate) navigator.vibrate([300,100,300,100,800]);
+            }, 500);
+          }
+        }
+        nextLine();
+      }, 1500); // delay "reboot"
+    }, 2000); // delay fake exit
+  }, 300); // delay awal
+
 })();
 </script>
 </body>
